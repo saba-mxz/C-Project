@@ -1,3 +1,4 @@
+
 #include "character.h"
 
 
@@ -38,4 +39,3 @@ void Player::SetLocation(Room* room) {
 Room* Player::GetLocation() const {
     return location;
 }
-

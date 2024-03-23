@@ -1,0 +1,4 @@
+startRoom|Sword|A sharp sword with a jeweled hilt.
+startRoom|Shield|A sturdy shield adorned with intricate designs.
+hallway|Torch|An old torch emitting faint light.
+treasureRoom|Key|A small rusty key.

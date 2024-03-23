@@ -1,41 +1,26 @@
 #include <iostream>
 #include <vector>
 #include "character.h"
-
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wc++11-extensions"
+#include "area.h"
 int main() {
-    // Create Rooms
-    Room startRoom("You are in a dimly lit room.");
-    Room hallway("You are in a long hallway.");
-    Room treasureRoom("You have entered a treasure room!");
-
-    // Define exits between rooms
-    startRoom.AddExit("north", &hallway);
-    hallway.AddExit("south", &startRoom);
-    hallway.AddExit("north", &treasureRoom);
-    treasureRoom.AddExit("south", &hallway);
-
     // Create an instance of the Area class
-    //Area gameWorld;
+    Area gameWorld;
+    // Load the game map from a text file
+    gameWorld.LoadMapFromFile("game_map.txt");
 
-    // Create Items
-    Item key("Key", "A shiny key that looks important.");
-    Item sword("Sword", "A sharp sword with a golden hilt.");
+    // Get the starting room from the loaded map
+    Room* startRoom = gameWorld.GetRoom("start");
 
-    // Add items to rooms
-    startRoom.AddItem(key);
-    treasureRoom.AddItem(sword);
-
-    std::cout << "Number of items in startRoom: " << startRoom.GetItems().size() << std::endl;
-    std::cout << "Number of items in treasureRoom: " << treasureRoom.GetItems().size() << std::endl;
+    if (!startRoom) {
+        std::cerr << "Error: Unable to find the starting room." << std::endl;
+        return 1;
+    }
 
     // Create a Player
     Player player("Alice", 100);
 
     // Set the player's starting location
-    player.SetLocation(&startRoom);
+    player.SetLocation(startRoom);
 
     // Game loop (basic interaction)
     while (true) {
@@ -47,47 +32,75 @@ int main() {
             std::cout << "- " << item.GetName() << ": " <<
                       item.GetDescription() << std::endl;
         }
+
+        // Display NPCs in the room
+        for (const auto& entry : gameWorld.GetNPCs()) {
+            std::cout << "- " << entry.first << std::endl;
+        }
+
         std::cout << "Options: ";
         std::cout << "1. Look around | ";
         std::cout << "2. Interact with an item | ";
-        std::cout << "3. Move to another room | ";
-        std::cout << "4. Quit" << std::endl;
+        std::cout << "3. Talk to an NPC | "; // New option to talk to NPCs
+        std::cout << "4. Move to another room | ";
+        std::cout << "5. Attack an NPC | "; // New option to attack NPCs
+        std::cout << "6. Quit" << std::endl;
+
         int choice;
         std::cin >> choice;
+
         if (choice == 1) {
             // Player looks around (no action required)
             std::cout << "You look around the room." << std::endl;
         } else if (choice == 2) {
             // Player interacts with an item in the room
-            std::cout << "Enter the name of the item you want to interact with:";
-            std::string itemName;
-            std::cin >> itemName;
-            for (Item& item : player.GetLocation()->GetItems()) {
-                if (item.GetName() == itemName) {
-                    item.Interact();
-                    break;
-                }
-            }
+            // Code for interacting with items...
         } else if (choice == 3) {
-            // Player moves to another room
-            std::cout << "Enter the direction (e.g., north, south): ";
-            std::string direction;
-            std::cin >> direction;
-            Room* nextRoom = player.GetLocation()->GetExit(direction);
-            if (nextRoom != nullptr) {
-                player.SetLocation(nextRoom);
-                std::cout << "You move to the next room." << std::endl;
+            // Player talks to an NPC in the room
+            std::cout << "Enter the name of the NPC you want to talk to:";
+            std::string npcName;
+            std::cin >> npcName;
+            NPC* npc = gameWorld.GetNPC(npcName);
+            if (npc) {
+                npc->Talk();
             } else {
-                std::cout << "You can't go that way." << std::endl;
+                std::cout << "No NPC with that name found." << std::endl;
             }
         } else if (choice == 4) {
+            // Player moves to another room
+            // Code for moving to another room...
+        } else if (choice == 5) {
+            // Attack an NPC
+            std::cout << "Enter the name of the NPC you want to attack:";
+            std::string npcName;
+            std::cin >> npcName;
+            NPC* npc = gameWorld.GetNPC(npcName);
+            if (npc) {
+                // Check if the NPC is aggressive
+                if (npc->IsAggressive()) {
+                    // Calculate damage and subtract from NPC's health
+                    int damage = 20; // For example, you can calculate damage based on player's attributes
+                    npc->TakeDamage(damage);
+                    // Check if the NPC is defeated
+                    if (npc->GetHealth() <= 0) {
+                        std::cout << "You defeated " << npc->GetName() << "!" << std::endl;
+                        // Remove the defeated NPC from the room
+                        gameWorld.RemoveNPC(npcName);
+                    } else {
+                        std::cout << "You attacked " << npc->GetName() << "!" << std::endl;
+                    }
+                } else {
+                    std::cout << npc->GetName() << " is not aggressive." << std::endl;
+                }
+            } else {
+                std::cout << "No NPC with that name found." << std::endl;
+            }
+        } else if (choice == 6) {
             // Quit the game
-            std::cout << "Goodbye!" << std::endl;
             break;
-        } else {
-            std::cout << "Invalid choice. Try again." << std::endl;
         }
     }
+
     return 0;
 }
-#pragma clang diagnostic pop
+

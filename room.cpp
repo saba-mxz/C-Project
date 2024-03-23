@@ -15,11 +15,13 @@ const std::vector<Item>& Room::GetItems() const {
 std::vector<Item>& Room::GetItems() {
     return items;
 }
-
 void Room::AddItem(const Item& item)
 {
     items.push_back(item);
-    std::cout << "Item Added" << std::endl;
+    //std::cout << "Item Added" << std::endl;
+}
+void Room::SetDescription(const std::string& description) {
+    this->description = description;
 }
 
 void Room::RemoveItem(const Item& item)
@@ -39,5 +41,12 @@ Room* Room::GetExit(const std::string& direction) const {
         return nullptr;
     }
 
+
+
+}
+
+//Return the room's exits
+std::map<std::string, Room*> Room::GetExits() const {
+    return exits;
 }
 #pragma clang diagnostic pop
